@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/server.js",
+	"engines": {
+		"node": "12.18.2"
+	},
   "scripts": {
     "presetup": "[ -f \"./example.env\" ]  && (mv example.env .env && echo created '.env' file successfully) || echo \"'no example.env.' Skipping...\"",
     "setup": "node setup.js && rm -rf ./.git && git init && npm i",
