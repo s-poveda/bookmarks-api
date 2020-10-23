@@ -5,11 +5,11 @@ const logger = winston.createLogger({
 	level: 'info',
 	format: winston.format.json(),
 	transport: [
-		new winston.transports.File({filename :'info.log'});
+		new winston.transports.File({filename :'info.log'})
 	]
 });
 
-if ( NODE_ENV !== 'production'0) {
+if ( NODE_ENV !== 'production') {
 	logger.add( new winston.transports.Console({
 		format : winston.format.simple()
 	}));

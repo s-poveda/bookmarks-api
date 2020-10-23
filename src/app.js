@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
+const bookmarkRouter = require('./routes/bookmark.route');
 
 const app = express();
 
@@ -13,8 +14,6 @@ app.use(morgan(morganOptn));
 app.use(helmet());
 app.use(cors());
 
-app.get('/', (req, res)=>{
-	res.status(200).end();
-});
+app.use('/bookmark', bookmarkRouter)
 
 module.exports = app;
