@@ -24,10 +24,29 @@ bookmarkRouter
 bookmarkRouter
 	.route('/:id')
 	.get((req,res)=>{
-		// if ()
+		const markId = req.params.id;
+		const bookmark = store.bookmarks.find( book => book.id === markId);
+		if (!bookmark) return res.status(400).json({message: 'Invalid bookmark id.'});
+		res.json(bookmark);
 	})
 	.delete((req,res)=>{
+		const markId = req.params.id;
+		const infoLog = {
+			message: `A user requested deletion of bookmark. ID: '${markId}'`,
+			timestamp: req._startTime,
+			label: 'DELETE'
+		}
+		const success = store.removeBookmark(markId);
 
+		if (!success) {
+			infoLog.message = `${infoLog.message}\nDELETION OF '${markId}' ID FAILED.`
+			logger.info(infoLog);
+			return res.status(400).json({message: 'Invalid bookmark id.'});
+		}
+
+		infoLog.message = `${infoLog.message}\nDELETION OF '${markId}' SUCCESSFUL.`
+		logger.info(infoLog);
+		res.status(204).end();
 	});
 
 module.exports = bookmarkRouter;

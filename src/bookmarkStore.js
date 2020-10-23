@@ -16,7 +16,15 @@ const store =	{
 		obj.id = uuid();
 		this.bookmarks = [...this.bookmarks, obj];
 		return obj;
+	},
+	//return true on succes. false on fail
+	removeBookmark (id) {
+		const startLen = this.bookmarks.length;
+		this.bookmarks = this.bookmarks.filter( mark=> mark.id !== id );
+		if (startLen === this.bookmarks.length) return false;
+		return true;
 	}
+
 }
 
 module.exports = store;
