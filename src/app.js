@@ -8,7 +8,7 @@ const bookmarkRouter = require('./routes/bookmark.route');
 
 const app = express();
 
-app.use(morgan((()=>(NODE_ENV === 'production') ? 'tiny' : 'common')()));
+app.use(morgan((NODE_ENV === 'production') ? 'tiny' : 'common'));
 app.use(helmet());
 app.use(cors());
 app.use('/bookmark', bookmarkRouter);
