@@ -9,16 +9,41 @@ bookmarkRouter
 	.route('/')
 	.get((req, res) => res.json(store.bookmarks))
 	.post(bodyParser, (req, res)=> {
+		const infoLog = {
+			label: 'POST',
+			timestamp: req._startTime,
+			message: `User requested POST of bookmark. ATTEMPTING TO ADD BODY: ${JSON.stringify(req.body)}`
+		}
 		const { title, desc, rating, url } = req.body;
-		if (!title) return res.status(400).json({ message : 'Invalid title. Must supply a title.'});
-		if (!rating || isNaN(parseFloat(rating)) ) return res.status(400).json({ message : 'Invalid rating. Must be a number.'});
-		if (!url || !url.toLowerCase().startsWith('https') ) return res.status(400).json({ message : 'Invalid url. Must contain http protocol.'});
+
+		if (!title){
+			 let message = 'Invalid title. Must supply a title.'
+			 infoLog.message = `${infoLog.message}\n${message}`
+			 logger.info(infoLog);
+			 return res.status(400).json({ message });
+		}
+
+		if (!rating || isNaN(parseFloat(rating)) ) {
+			let message = 'Invalid rating. Must be a number.'
+			infoLog.message = `${infoLog.message}\n${message}`
+			logger.info(infoLog);
+			return res.status(400).json({ message });
+		}
+
+		if (!url || !url.toLowerCase().startsWith('https') ) {
+			let message = 'Invalid url. Must contain http protocol.'
+			infoLog.message = `${infoLog.message}\n${message}`
+			logger.info(infoLog);
+			return res.status(400).json({ message });
+		}
 
 		// TODO: chekc for <script>
-		const toBeAdded = { title, desc, rating, url };
+		const addedBookmark = store.addBookmark({ title, desc, rating, url });
+		infoLog.message = `${infoLog.message}\nPOST ABOVE SUCCESSFUL.`;
+		logger.info(infoLog);
 
 		//addBookmark returns the object that was added to the store
-		res.status(201).json(store.addBookmark(toBeAdded));
+		res.status(201).json(addedBookmark);
 	});
 
 bookmarkRouter
@@ -32,9 +57,9 @@ bookmarkRouter
 	.delete((req,res)=>{
 		const markId = req.params.id;
 		const infoLog = {
-			message: `A user requested deletion of bookmark. ID: '${markId}'`,
+			label: 'DELETE',
 			timestamp: req._startTime,
-			label: 'DELETE'
+			message: `A user requested DELETE of bookmark. ID: '${markId}'`
 		}
 		const success = store.removeBookmark(markId);
 
