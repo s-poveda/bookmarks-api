@@ -1,18 +1,28 @@
 const express = require('express');
 const logger = require('../logger');
 const store = require('../bookmarkStore');
+const validateBearerToken = require('../validateBearerToken');
 
 const bookmarkRouter = express.Router();
 const bodyParser = express.json();
+
+bookmarkRouter.use(['/','/:id'], (req, res, next)=>{
+	if (req.method === 'GET') return next();
+	validateBearerToken(req, res, next);
+});
 
 bookmarkRouter
 	.route('/')
 	.get((req, res) => res.json(store.bookmarks))
 	.post(bodyParser, (req, res)=> {
+
+		// each log message begins with this base message. Each conditional customizes the base message
+		// label is used to keep track of http verb
+		// timestamp comes from the request start time
 		const infoLog = {
-			label: 'POST',
+			label: req.method,
 			timestamp: req._startTime,
-			message: `User requested POST of bookmark. ATTEMPTING TO ADD BODY: ${JSON.stringify(req.body)}`
+			message: `User requested ${req.method} of bookmark. ATTEMPTING TO ADD BODY:\n${JSON.stringify(req.body)}`
 		}
 		const { title, desc, rating, url } = req.body;
 
@@ -55,12 +65,18 @@ bookmarkRouter
 		res.json(bookmark);
 	})
 	.delete((req,res)=>{
+
 		const markId = req.params.id;
+		// each log message begins with this base message. Each conditional customizes the base message
+		// label is used to keep track of http verb
+		// timestamp comes from the request start time
 		const infoLog = {
-			label: 'DELETE',
+			label: req.method,
 			timestamp: req._startTime,
-			message: `A user requested DELETE of bookmark. ID: '${markId}'`
+			message: `A user requested ${req.method} of bookmark. ID: '${markId}'`
 		}
+
+		// removeBookmark returns true on success. false on fail
 		const success = store.removeBookmark(markId);
 
 		if (!success) {
@@ -69,7 +85,7 @@ bookmarkRouter
 			return res.status(400).json({message: 'Invalid bookmark id.'});
 		}
 
-		infoLog.message = `${infoLog.message}\nDELETION OF '${markId}' SUCCESSFUL.`
+		infoLog.message = `${infoLog.message}\nDELETION OF '${markId}' ID SUCCESSFUL.`
 		logger.info(infoLog);
 		res.status(204).end();
 	});
