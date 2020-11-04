@@ -2,23 +2,26 @@ const express = require('express');
 const logger = require('../logger');
 const store = require('../bookmarkStore');
 const validateBearerToken = require('../validateBearerToken');
+const bookmarksService = require('./services/bookmarksService');
 
 const bookmarkRouter = express.Router();
-const bodyParser = express.json();
+const JsonBodyParser = express.json();
 
 bookmarkRouter.use(['/','/:id'], (req, res, next)=>{
 	if (req.method === 'GET') return next();
 	validateBearerToken(req, res, next);
 });
 
+// IDEA: make helper class to handle logging
 bookmarkRouter
 	.route('/')
 	.get((req, res) => res.json(store.bookmarks))
-	.post(bodyParser, (req, res)=> {
+	.post(JsonBodyParser, (req, res, next)=> {
 
 		// each log message begins with this base message. Each conditional customizes the base message
 		// label is used to keep track of http verb
 		// timestamp comes from the request start time
+
 		const infoLog = {
 			label: req.method,
 			timestamp: req._startTime,
@@ -41,13 +44,12 @@ bookmarkRouter
 		}
 
 		if (!url || !url.toLowerCase().startsWith('https') ) {
-			let message = 'Invalid url. Must contain http protocol.'
+			let message = 'Invalid url. Must contain http(s) protocol.'
 			infoLog.message = `${infoLog.message}\n${message}`
 			logger.info(infoLog);
 			return res.status(400).json({ message });
 		}
 
-		// TODO: chekc for <script>
 		const addedBookmark = store.addBookmark({ title, desc, rating, url });
 		infoLog.message = `${infoLog.message}\nPOST ABOVE SUCCESSFUL.`;
 		logger.info(infoLog);
